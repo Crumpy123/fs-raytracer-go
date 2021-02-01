@@ -16,9 +16,9 @@ func printProgress(height, h int) {
 
 func writeColor(renderImage *image.RGBA, pixelColor *Vec3, set *Settings, x, y int) {
 	scale := 1.0 / float64(set.samplesPerPixel)
-	r := pixelColor.x * scale
-	g := pixelColor.y * scale
-	b := pixelColor.z * scale
+	r := math.Sqrt(pixelColor.x * scale)
+	g := math.Sqrt(pixelColor.y * scale)
+	b := math.Sqrt(pixelColor.z * scale)
 	//math.Round(r * 255)
 	ir := uint8(255 * clamp(r, 0.0, 0.999))
 	ig := uint8(255 * clamp(g, 0.0, 0.999))
@@ -33,8 +33,8 @@ func rayColor(ray *Ray, world *HittableList, depth int) Vec3 {
 		return Vec3{0, 0, 0}
 	}
 
-	if world.HitSomething(ray, 0, math.MaxFloat64, &rec) {
-		target := rec.p.Add(rec.normal).Add(randInUnitSphere())
+	if world.HitSomething(ray, 0.001, math.MaxFloat64, &rec) {
+		target := rec.p.Add(randInHemisphere(rec.normal))
 		r := Ray{rec.p, target.Sub(rec.p)}
 		return rayColor(&r, world, depth-1).Mul(.5)
 	}

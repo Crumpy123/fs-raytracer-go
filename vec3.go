@@ -53,6 +53,10 @@ func (p Vec3) UnitVector() Vec3 {
 	return p.Divide(p.Len())
 }
 
+func (p *Vec3) UnitVectorInPlace() {
+	*p = p.UnitVector()
+}
+
 func Dot(vec1, vec2 Vec3) float64 {
 	return vec1.x*vec2.x + vec1.y*vec2.y + vec1.z*vec2.z
 }
@@ -71,5 +75,18 @@ func randInUnitSphere() Vec3 {
 		if p.LenSquared() < 1 {
 			return p
 		}
+	}
+}
+
+func randUnitVector() Vec3 {
+	return randInUnitSphere().UnitVector()
+}
+
+func randInHemisphere(normal Vec3) Vec3 {
+	inUnitSphere := randInUnitSphere()
+	if Dot(inUnitSphere, normal) > 0 {
+		return inUnitSphere
+	} else {
+		return inUnitSphere.Mul(-1)
 	}
 }
