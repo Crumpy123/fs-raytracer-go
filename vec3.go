@@ -1,6 +1,9 @@
 package main
 
-import "math"
+import (
+	"math"
+	"math/rand"
+)
 
 type Vec3 struct {
 	x, y, z float64
@@ -52,4 +55,21 @@ func (p Vec3) UnitVector() Vec3 {
 
 func Dot(vec1, vec2 Vec3) float64 {
 	return vec1.x*vec2.x + vec1.y*vec2.y + vec1.z*vec2.z
+}
+
+func randVec3() Vec3 {
+	return Vec3{rand.Float64(), rand.Float64(), rand.Float64()}
+}
+
+func randVec3WBound(min, max float64) Vec3 {
+	return Vec3{randFloatWBound(min, max), randFloatWBound(min, max), randFloatWBound(min, max)}
+}
+
+func randInUnitSphere() Vec3 {
+	for {
+		p := randVec3WBound(-1, 1)
+		if p.LenSquared() < 1 {
+			return p
+		}
+	}
 }

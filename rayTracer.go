@@ -26,10 +26,17 @@ func writeColor(renderImage *image.RGBA, pixelColor *Vec3, set *Settings, x, y i
 	renderImage.SetRGBA(x, set.imageHeight-y, color.RGBA{R: ir, G: ig, B: ib, A: 255})
 }
 
-func rayColor(ray *Ray, world *HittableList) Vec3 {
+func rayColor(ray *Ray, world *HittableList, depth int) Vec3 {
 	var rec HitRecord
+
+	if depth <= 0 {
+		return Vec3{0, 0, 0}
+	}
+
 	if world.HitSomething(ray, 0, math.MaxFloat64, &rec) {
-		return rec.normal.Add(Vec3{1, 1, 1}).Mul(0.5)
+		target := rec.p.Add(rec.normal).Add(randInUnitSphere())
+		r := Ray{rec.p, target.Sub(rec.p)}
+		return rayColor(&r, world, depth-1).Mul(.5)
 	}
 
 	unitDirection := ray.Direction.UnitVector()
@@ -62,7 +69,7 @@ func traceTheRays() image.Image {
 				v := (float64(y) + rand.Float64()) / (float64(set.imageHeight) - 1)
 
 				ray := cam.getRay(u, v)
-				pixelColor.AddInPlace(rayColor(&ray, &world))
+				pixelColor.AddInPlace(rayColor(&ray, &world, set.maxDepth))
 			}
 
 			writeColor(renderImage, &pixelColor, &set, x, y)

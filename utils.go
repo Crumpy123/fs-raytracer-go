@@ -2,8 +2,8 @@ package main
 
 import "math/rand"
 
-func randomFloat(min, max float64) float64 {
-	return min + (max-min)*rand.Float64()
+func randFloatWBound(min, max float64) float64 {
+	return min + rand.Float64()*(max-min) //(max-min)*rand.Float64()
 }
 
 //clamps value x to mi or max
