@@ -1,24 +1,24 @@
 package main
 
-type HittableList struct{
+type HittableList struct {
 	objects []Hittable
 }
 
-func (h* HittableList) Add(newHittable Hittable){
+func (h *HittableList) Add(newHittable Hittable) {
 	h.objects = append(h.objects, newHittable)
 }
 
-func (h *HittableList) PClear(){
+func (h *HittableList) PClear() {
 	h.objects = []Hittable{}
 }
 
-func (hL *HittableList) HitSomething(ray *Ray, minT float64, maxT float64, rec *HitRecord)bool{
+func (h *HittableList) HitSomething(ray *Ray, minT float64, maxT float64, rec *HitRecord) bool {
 	tempRec := rec
 	hitAnything := false
 	closestSoFar := maxT
 
-	for _, object := range hL.objects{
-		if object.Hit(ray,minT,closestSoFar, tempRec ){
+	for _, object := range h.objects {
+		if object.Hit(ray, minT, closestSoFar, tempRec) {
 			hitAnything = true
 			closestSoFar = tempRec.t
 			rec = tempRec
