@@ -6,7 +6,7 @@ type Camera struct {
 	origin, horizontal, vertical, lowerLeftCorner Vec3
 }
 
-func (c *Camera) setCamera() {
+func (c *Camera) init() {
 	c.aspectRation = 16.0 / 9.0
 	c.viewportHeight = 2.0
 	c.viewportWidth = c.aspectRation * c.viewportHeight
