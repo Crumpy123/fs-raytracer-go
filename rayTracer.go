@@ -6,6 +6,8 @@ import (
 	"image/color"
 	"math"
 	"math/rand"
+	"runtime"
+	"time"
 )
 
 func printProgress(height, h int) {
@@ -45,7 +47,27 @@ func rayColor(ray *Ray, world *HittableList, depth int) Vec3 {
 	return Vec3{1.0, 1.0, 1.0}.Mul(1.0 - t).Add(Vec3{0.5, 0.7, 1.0}.Mul(t))
 }
 
+func processChunkOfImage(y int, set Settings, cam Camera, world *HittableList, renderImage *image.RGBA, ch chan int) {
+
+	for row := y; row > (y-set.rowProcessingChunk) && row > 0; row-- {
+		for x := 0; x < set.imageWidth; x++ {
+			pixelColor := Vec3{0, 0, 0}
+			for s := 0; s < set.samplesPerPixel; s++ {
+				u := (float64(x) + rand.Float64()) / (float64(set.imageWidth) - 1)
+				v := (float64(row) + rand.Float64()) / (float64(set.imageHeight) - 1)
+
+				ray := cam.getRay(u, v)
+				pixelColor.AddInPlace(rayColor(&ray, world, set.maxDepth))
+			}
+			writeColor(renderImage, &pixelColor, &set, x, row)
+		}
+	}
+	<-ch
+}
+
 func traceTheRays() image.Image {
+	fmt.Println(runtime.NumCPU())
+
 	//Image
 	var set Settings
 	set.declare()
@@ -60,20 +82,25 @@ func traceTheRays() image.Image {
 	cam.setCamera()
 
 	renderImage := image.NewRGBA(image.Rect(0, 0, set.imageWidth, set.imageHeight))
-	for y := set.imageHeight; y >= 0; y-- {
-		printProgress(set.imageHeight, y)
-		for x := 0; x < set.imageWidth; x++ {
-			pixelColor := Vec3{0, 0, 0}
-			for s := 0; s < set.samplesPerPixel; s++ {
-				u := (float64(x) + rand.Float64()) / (float64(set.imageWidth) - 1)
-				v := (float64(y) + rand.Float64()) / (float64(set.imageHeight) - 1)
 
-				ray := cam.getRay(u, v)
-				pixelColor.AddInPlace(rayColor(&ray, &world, set.maxDepth))
-			}
+	counter := set.imageHeight
 
-			writeColor(renderImage, &pixelColor, &set, x, y)
-		}
+	ch := make(chan int, runtime.NumCPU())
+
+	for counter >= 0 {
+		printProgress(set.imageHeight, counter)
+
+		ch <- 0
+		go processChunkOfImage(counter, set, cam, &world, renderImage, ch)
+		counter -= set.rowProcessingChunk
+
 	}
+
+	close(ch)
+
+	for len(ch) > 0 {
+		time.Sleep(time.Millisecond * 50)
+	}
+
 	return renderImage
 }

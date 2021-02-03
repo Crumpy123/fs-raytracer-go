@@ -4,6 +4,7 @@ type HitRecord struct {
 	p, normal Vec3
 	t         float64
 	frontFace bool
+	material  Material
 }
 
 type Hittable interface {
