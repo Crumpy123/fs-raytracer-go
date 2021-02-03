@@ -3,8 +3,9 @@ package main
 import "math"
 
 type Sphere struct {
-	center Vec3
-	radius float64
+	center   Vec3
+	radius   float64
+	material Material
 }
 
 func (s Sphere) Hit(ray *Ray, minT float64, maxT float64, rec *HitRecord) bool {
@@ -31,6 +32,7 @@ func (s Sphere) Hit(ray *Ray, minT float64, maxT float64, rec *HitRecord) bool {
 	rec.p = ray.At(rec.t)
 	outwardNormal := (rec.p.Sub(s.center)).Divide(s.radius)
 	rec.setFaceNormal(ray, &outwardNormal)
-	//rec.normal = (rec.p.Sub(s.center)).Divide(s.radius)
+	rec.material = s.material
+
 	return true
 }

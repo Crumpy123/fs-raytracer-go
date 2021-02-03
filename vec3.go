@@ -9,52 +9,56 @@ type Vec3 struct {
 	x, y, z float64
 }
 
-func (p Vec3) Sub(other Vec3) Vec3 {
-	return Vec3{p.x - other.x, p.y - other.y, p.z - other.z}
+func (v Vec3) Sub(other Vec3) Vec3 {
+	return Vec3{v.x - other.x, v.y - other.y, v.z - other.z}
 }
 
-func (p *Vec3) SubInPlace(other Vec3) {
-	*p = p.Sub(other)
+func (v *Vec3) SubInPlace(other Vec3) {
+	*v = v.Sub(other)
 }
 
-func (p Vec3) Add(other Vec3) Vec3 {
-	return Vec3{p.x + other.x, p.y + other.y, p.z + other.z}
+func (v Vec3) Add(other Vec3) Vec3 {
+	return Vec3{v.x + other.x, v.y + other.y, v.z + other.z}
 }
 
-func (p *Vec3) AddInPlace(other Vec3) {
-	*p = p.Add(other)
+func (v *Vec3) AddInPlace(other Vec3) {
+	*v = v.Add(other)
 }
 
-func (p Vec3) Mul(x float64) Vec3 {
-	return Vec3{p.x * x, p.y * x, p.z * x}
+func (v Vec3) Mul(x float64) Vec3 {
+	return Vec3{v.x * x, v.y * x, v.z * x}
 }
 
-func (p *Vec3) MulInPlace(x float64) {
-	*p = p.Mul(x)
+func (v Vec3) MulWithVec3(other Vec3) Vec3 {
+	return Vec3{v.x * other.x, v.y * other.y, v.z * other.z}
 }
 
-func (p Vec3) Divide(x float64) Vec3 {
-	return p.Mul(1 / x)
+func (v *Vec3) MulInPlace(x float64) {
+	*v = v.Mul(x)
 }
 
-func (p *Vec3) DivInPlace(x float64) {
-	*p = p.Divide(x)
+func (v Vec3) Divide(x float64) Vec3 {
+	return v.Mul(1 / x)
 }
 
-func (p Vec3) LenSquared() float64 {
-	return p.x*p.x + p.y*p.y + p.z*p.z
+func (v *Vec3) DivInPlace(x float64) {
+	*v = v.Divide(x)
 }
 
-func (p Vec3) Len() float64 {
-	return math.Sqrt(p.LenSquared())
+func (v Vec3) LenSquared() float64 {
+	return v.x*v.x + v.y*v.y + v.z*v.z
 }
 
-func (p Vec3) UnitVector() Vec3 {
-	return p.Divide(p.Len())
+func (v Vec3) Len() float64 {
+	return math.Sqrt(v.LenSquared())
 }
 
-func (p *Vec3) UnitVectorInPlace() {
-	*p = p.UnitVector()
+func (v Vec3) UnitVector() Vec3 {
+	return v.Divide(v.Len())
+}
+
+func (v *Vec3) UnitVectorInPlace() {
+	*v = v.UnitVector()
 }
 
 func Dot(vec1, vec2 Vec3) float64 {
@@ -89,4 +93,14 @@ func randInHemisphere(normal Vec3) Vec3 {
 	} else {
 		return inUnitSphere.Mul(-1)
 	}
+}
+
+//return true if vector is near zero
+func (v Vec3) nearZero() bool {
+	s := 1e-8
+	return (math.Abs(v.x) < s) && (math.Abs(v.y) < s) && (math.Abs(v.z) < s)
+}
+
+func reflectVec(a Vec3, b Vec3) Vec3 {
+	return a.Sub(b.Mul(Dot(a, b) * 2))
 }
