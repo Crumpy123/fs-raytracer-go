@@ -1,9 +1,20 @@
 package main
 
-import "math/rand"
+import (
+	"math/rand"
+	"time"
+)
 
-func randFloatWBound(min, max float64) float64 {
-	return min + rand.Float64()*(max-min) //(max-min)*rand.Float64()
+type RNG interface {
+	Float64() float64
+}
+
+func NewRNG() RNG {
+	return rand.New(rand.NewSource(time.Now().UnixNano()))
+}
+
+func randFloatWBound(min, max float64, rng RNG) float64 {
+	return min + rng.Float64()*(max-min)
 }
 
 //clamps value x to mi or max

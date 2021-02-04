@@ -1,5 +1,7 @@
 package main
 
+import "runtime"
+
 type Settings struct {
 	aspectRatio                                                      float64
 	imageHeight, imageWidth, samplesPerPixel, maxDepth, rowsPerChunk int
@@ -11,5 +13,5 @@ func (i *Settings) init() {
 	i.imageHeight = int(float64(i.imageWidth) / i.aspectRatio)
 	i.samplesPerPixel = 100
 	i.maxDepth = 50
-	i.rowsPerChunk = i.imageHeight
+	i.rowsPerChunk = i.imageHeight / runtime.NumCPU()
 }

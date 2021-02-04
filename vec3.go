@@ -69,30 +69,21 @@ func randVec3() Vec3 {
 	return Vec3{rand.Float64(), rand.Float64(), rand.Float64()}
 }
 
-func randVec3WBound(min, max float64) Vec3 {
-	return Vec3{randFloatWBound(min, max), randFloatWBound(min, max), randFloatWBound(min, max)}
+func randVec3WBound(min, max float64, rng RNG) Vec3 {
+	return Vec3{randFloatWBound(min, max, rng), randFloatWBound(min, max, rng), randFloatWBound(min, max, rng)}
 }
 
-func randInUnitSphere() Vec3 {
+func randInUnitSphere(rng RNG) Vec3 {
 	for {
-		p := randVec3WBound(-1, 1)
+		p := randVec3WBound(-1, 1, rng)
 		if p.LenSquared() < 1 {
 			return p
 		}
 	}
 }
 
-func randUnitVector() Vec3 {
-	return randInUnitSphere().UnitVector()
-}
-
-func randInHemisphere(normal Vec3) Vec3 {
-	inUnitSphere := randInUnitSphere()
-	if Dot(inUnitSphere, normal) > 0 {
-		return inUnitSphere
-	} else {
-		return inUnitSphere.Mul(-1)
-	}
+func randUnitVector(rng RNG) Vec3 {
+	return randInUnitSphere(rng).UnitVector()
 }
 
 //return true if vector is near zero
