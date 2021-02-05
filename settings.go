@@ -1,10 +1,8 @@
 package main
 
-import "runtime"
-
 type Settings struct {
-	aspectRatio                                                      float64
-	imageHeight, imageWidth, samplesPerPixel, maxDepth, rowsPerChunk int
+	aspectRatio                                                            float64
+	imageHeight, imageWidth, samplesPerPixel, rayBounceLimit, rowsPerChunk int
 }
 
 func (i *Settings) init() {
@@ -12,6 +10,6 @@ func (i *Settings) init() {
 	i.imageWidth = 400
 	i.imageHeight = int(float64(i.imageWidth) / i.aspectRatio)
 	i.samplesPerPixel = 100
-	i.maxDepth = 50
-	i.rowsPerChunk = i.imageHeight / runtime.NumCPU()
+	i.rayBounceLimit = 50
+	i.rowsPerChunk = 1 //i.imageHeight / runtime.NumCPU()
 }

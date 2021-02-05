@@ -1,7 +1,7 @@
 package main
 
 type Material interface {
-	Scatter(ray *Ray, hRecord *HitRecord, attenuation *Vec3, scattered *Ray, rng RNG) bool
+	Reflect(lightRay *LightRay, rng RNG)
 }
 
 type Lambertian struct {
@@ -12,22 +12,20 @@ type Metal struct {
 	albedo Vec3
 }
 
-func (m Lambertian) Scatter(ray *Ray, hRecord *HitRecord, attenuation *Vec3, scattered *Ray, rng RNG) bool {
-	scatterDirection := hRecord.normal.Add(randUnitVector(rng))
+func (l Lambertian) Reflect(lightRay *LightRay, rng RNG) {
+	scatterDirection := lightRay.hitRecord.normal.Add(randUnitVector(rng))
 
 	//catch degenerate scatter direction
 	if scatterDirection.nearZero() {
-		scatterDirection = hRecord.normal
+		scatterDirection = lightRay.hitRecord.normal
 	}
 
-	*scattered = Ray{hRecord.p, scatterDirection}
-	*attenuation = m.albedo
-	return true
+	lightRay.ray = Ray{lightRay.hitRecord.point, scatterDirection}
+	lightRay.color = lightRay.color.MulWithVec3(l.albedo)
 }
 
-func (m Metal) Scatter(ray *Ray, hRecord *HitRecord, attenuation *Vec3, scattered *Ray, rng RNG) bool {
-	reflected := reflectVec(ray.Direction.UnitVector(), hRecord.normal)
-	*scattered = Ray{hRecord.p, reflected}
-	*attenuation = m.albedo
-	return Dot(scattered.Direction, hRecord.normal) > 0
+func (m Metal) Reflect(lightRay *LightRay, rng RNG) {
+	reflected := reflectVec(lightRay.ray.Direction.UnitVector(), lightRay.hitRecord.normal)
+	lightRay.ray = Ray{lightRay.hitRecord.point, reflected}
+	lightRay.color = lightRay.color.MulWithVec3(m.albedo)
 }
