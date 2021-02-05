@@ -26,7 +26,7 @@ func traceTheRays() image.Image {
 	var world HittableList
 
 	mGround := Lambertian{Vec3{0.8, 0.8, 0.0}}
-	mCenter := Dielectric{1.5}
+	mCenter := Lambertian{Vec3{0.1, 0.2, 0.5}}
 	mLeft := Dielectric{1.5}
 	mRight := Metal{Vec3{0.8, 0.6, 0.2}, 0.1}
 

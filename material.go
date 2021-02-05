@@ -1,5 +1,7 @@
 package main
 
+import "math"
+
 type Material interface {
 	Reflect(lightRay *LightRay, rng RNG)
 }
@@ -43,8 +45,18 @@ func (d Dielectric) Reflect(lightRay *LightRay, rng RNG) {
 	} else {
 		refractionRatio = d.indexOfRefraction
 	}
+	unitDirection := lightRay.ray.Direction.UnitVector()
+	cosTheta := math.Min(Dot(unitDirection.Mul(-1), lightRay.hitRecord.normal), 1.0)
+	sinTheta := math.Sqrt(1.0 - cosTheta*cosTheta)
 
-	refracted := refractVec(lightRay.ray.Direction.UnitVector(), lightRay.hitRecord.normal, refractionRatio)
+	cannotRefract := refractionRatio*sinTheta > 1.0
+	var direction Vec3
+	if cannotRefract {
+		direction = reflectVec(unitDirection, lightRay.hitRecord.normal)
+	} else {
+		direction = refractVec(unitDirection, lightRay.hitRecord.normal, refractionRatio)
+	}
+	//refracted := refractVec(lightRay.ray.Direction.UnitVector(), lightRay.hitRecord.normal, refractionRatio)
 
-	lightRay.ray = Ray{lightRay.hitRecord.point, refracted}
+	lightRay.ray = Ray{lightRay.hitRecord.point, direction}
 }
