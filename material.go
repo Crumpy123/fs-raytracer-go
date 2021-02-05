@@ -5,11 +5,12 @@ type Material interface {
 }
 
 type Lambertian struct {
-	albedo Vec3
+	color Vec3
 }
 
 type Metal struct {
-	albedo Vec3
+	color Vec3
+	fuzz  float64
 }
 
 func (l Lambertian) Reflect(lightRay *LightRay, rng RNG) {
@@ -21,11 +22,11 @@ func (l Lambertian) Reflect(lightRay *LightRay, rng RNG) {
 	}
 
 	lightRay.ray = Ray{lightRay.hitRecord.point, scatterDirection}
-	lightRay.color = lightRay.color.MulWithVec3(l.albedo)
+	lightRay.color = lightRay.color.MulWithVec3(l.color)
 }
 
 func (m Metal) Reflect(lightRay *LightRay, rng RNG) {
 	reflected := reflectVec(lightRay.ray.Direction.UnitVector(), lightRay.hitRecord.normal)
-	lightRay.ray = Ray{lightRay.hitRecord.point, reflected}
-	lightRay.color = lightRay.color.MulWithVec3(m.albedo)
+	lightRay.ray = Ray{lightRay.hitRecord.point, reflected.Add(randInUnitSphere(rng).Mul(m.fuzz))}
+	lightRay.color = lightRay.color.MulWithVec3(m.color)
 }
