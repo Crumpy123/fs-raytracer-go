@@ -26,8 +26,8 @@ func traceTheRays() image.Image {
 	var world HittableList
 
 	mGround := Lambertian{Vec3{0.8, 0.8, 0.0}}
-	mCenter := Lambertian{Vec3{0.7, 0.3, 0.3}}
-	mLeft := Metal{Vec3{0.8, 0.8, 0.8}, 0.3}
+	mCenter := Dielectric{1.5}
+	mLeft := Dielectric{1.5}
 	mRight := Metal{Vec3{0.8, 0.6, 0.2}, 0.1}
 
 	world.Add(Sphere{Vec3{0, -100.5, -1}, 100, mGround})
@@ -102,9 +102,6 @@ func setLightRayColor(lightRay *LightRay, world *HittableList, rng RNG) {
 		if world.HitSomething(&lightRay.ray, 0.001, math.MaxFloat64, &lightRay.hitRecord) {
 			//calculate scattering
 			lightRay.hitRecord.material.Reflect(lightRay, rng)
-			if Dot(lightRay.ray.Direction, lightRay.hitRecord.normal) <= 0 {
-				return
-			}
 			lightRay.bounceLimit -= 1
 		} else {
 			// hit nothing

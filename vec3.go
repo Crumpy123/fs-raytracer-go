@@ -95,3 +95,12 @@ func (v Vec3) nearZero() bool {
 func reflectVec(a Vec3, b Vec3) Vec3 {
 	return a.Sub(b.Mul(Dot(a, b) * 2))
 }
+
+func refractVec(uv Vec3, n Vec3, etaiOverEtat float64) Vec3 {
+	cosTheta := math.Min(Dot(uv.Mul(-1), n), 1.0)
+	//perpendicular
+	rOutPerp := uv.Add(n.Mul(cosTheta)).Mul(etaiOverEtat)
+	rOutParallel := n.Mul(-1 * math.Sqrt(math.Abs(1.0-rOutPerp.LenSquared())))
+	return rOutPerp.Add(rOutParallel)
+
+}
