@@ -17,6 +17,10 @@ func (v *Vec3) SubInPlace(other Vec3) {
 	*v = v.Sub(other)
 }
 
+func (v *Vec3) SubVec3(other Vec3) Vec3 {
+	return Vec3{v.x - other.x, v.y - other.y, v.z - other.z}
+}
+
 func (v Vec3) Add(other Vec3) Vec3 {
 	return Vec3{v.x + other.x, v.y + other.y, v.z + other.z}
 }
@@ -65,6 +69,12 @@ func Dot(vec1, vec2 Vec3) float64 {
 	return vec1.x*vec2.x + vec1.y*vec2.y + vec1.z*vec2.z
 }
 
+func Cross(u, v Vec3) Vec3 {
+	return Vec3{u.y*v.z - u.z*v.y,
+		u.z*v.x - u.x*v.z,
+		u.x*v.y - u.y*v.x}
+}
+
 func randVec3() Vec3 {
 	return Vec3{rand.Float64(), rand.Float64(), rand.Float64()}
 }
@@ -102,5 +112,13 @@ func refractVec(uv Vec3, n Vec3, etaiOverEtat float64) Vec3 {
 	rOutPerp := uv.Add(n.Mul(cosTheta)).Mul(etaiOverEtat)
 	rOutParallel := n.Mul(-1 * math.Sqrt(math.Abs(1.0-rOutPerp.LenSquared())))
 	return rOutPerp.Add(rOutParallel)
+}
 
+func randomInUnitDisc(rng RNG) Vec3 {
+	for {
+		p := Vec3{randFloatWBound(-1, 1, rng), randFloatWBound(-1, 1, rng), 0}
+		if p.LenSquared() < 1 {
+			return p
+		}
+	}
 }

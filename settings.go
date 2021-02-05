@@ -6,8 +6,8 @@ type Settings struct {
 }
 
 func (i *Settings) init() {
-	i.aspectRatio = 16.0 / 9.0
-	i.imageWidth = 400
+	i.aspectRatio = 3.0 / 2.0
+	i.imageWidth = 1200
 	i.imageHeight = int(float64(i.imageWidth) / i.aspectRatio)
 	i.samplesPerPixel = 100
 	i.rayBounceLimit = 50

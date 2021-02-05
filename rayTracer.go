@@ -4,6 +4,7 @@ import (
 	"image"
 	"image/color"
 	"math"
+	"math/rand"
 	"runtime"
 	"sync"
 )
@@ -23,21 +24,39 @@ func traceTheRays() image.Image {
 	set.init()
 
 	//World
+
+	/*
+		mGround := Lambertian{Vec3{0.8, 0.8, 0.0}}
+		mCenter := Lambertian{Vec3{0.1, 0.2, 0.5}}
+		mLeft := Dielectric{1.5}
+		mRight := Metal{Vec3{0.8, 0.6, 0.2}, 0.1}
+
+		world.Add(Sphere{Vec3{0, -100.5, -1}, 100, mGround})
+		world.Add(Sphere{Vec3{0, 0, -1}, 0.5, mCenter})
+		world.Add(Sphere{Vec3{-1, 0, -1}, -0.45, mLeft})
+		world.Add(Sphere{Vec3{1, 0, -1}, 0.5, mRight})
+
+	*/
+
 	var world HittableList
-
-	mGround := Lambertian{Vec3{0.8, 0.8, 0.0}}
-	mCenter := Lambertian{Vec3{0.1, 0.2, 0.5}}
-	mLeft := Dielectric{1.5}
-	mRight := Metal{Vec3{0.8, 0.6, 0.2}, 0.1}
-
-	world.Add(Sphere{Vec3{0, -100.5, -1}, 100, mGround})
-	world.Add(Sphere{Vec3{0, 0, -1}, 0.5, mCenter})
-	world.Add(Sphere{Vec3{-1, 0, -1}, -0.4, mLeft})
-	world.Add(Sphere{Vec3{1, 0, -1}, 0.5, mRight})
+	world = getRandomScene()
 
 	//Camera
+	/*
+		var cam Camera
+		lookFrom := Vec3{3, 3, 2}
+		lookAt := Vec3{0, 0, -1}
+		vUp := Vec3{0, 1, 0}
+		distToFocus := lookFrom.SubVec3(lookAt).Len()
+		aperture := 2.0
+	*/
 	var cam Camera
-	cam.init()
+	lookFrom := Vec3{13, 2, 3}
+	lookAt := Vec3{0, 0, 0}
+	vUp := Vec3{0, 1, 0}
+	distToFocus := 10.0
+	aperture := 0.1
+	cam.init(lookFrom, lookAt, vUp, 20, set.aspectRatio, aperture, distToFocus)
 
 	//rendering
 	renderImage := image.NewRGBA(image.Rect(0, 0, set.imageWidth, set.imageHeight))
@@ -87,7 +106,7 @@ func renderPixelChunk(job *RenderJob) {
 				u := (float64(x) + rng.Float64()) / (float64(job.set.imageWidth) - 1)
 				v := (float64(job.startRow) + rng.Float64()) / (float64(job.set.imageHeight) - 1)
 				lightRay.resetLightRay(job.set)
-				lightRay.ray = job.cam.getRay(u, v)
+				lightRay.ray = job.cam.getRay(u, v, rng)
 				setLightRayColor(&lightRay, job.world, rng)
 				pixelColor.AddInPlace(lightRay.color)
 			}
@@ -127,4 +146,43 @@ func writeColor(renderImage *image.RGBA, pixelColor *Vec3, set *Settings, x, y i
 	ig := uint8(255 * clamp(g, 0.0, 0.999))
 	ib := uint8(255 * clamp(b, 0.0, 0.999))
 	renderImage.SetRGBA(x, set.imageHeight-y-1, color.RGBA{R: ir, G: ig, B: ib, A: 255})
+}
+func getRandomScene() (world HittableList) {
+	groundMaterial := Lambertian{Vec3{0.5, 0.5, 0.5}}
+	world.Add(Sphere{Vec3{0, -1000, 0}, 1000, groundMaterial})
+	for a := -11; a < 11; a++ {
+		for b := -11; b < 11; b++ {
+			chooseMaterial := rand.Float64()
+			center := Vec3{float64(a) + 0.9*rand.Float64(), 0.2, float64(b) + 0.9*rand.Float64()}
+
+			if center.SubVec3(Vec3{4.0, 0.2, 0.0}).Len() > 0.9 {
+				var material Material
+				if chooseMaterial < 0.8 {
+					//diffuse
+					color := randVec3().MulWithVec3(randVec3())
+					material = Lambertian{color}
+					world.Add(Sphere{center, 0.2, material})
+				} else if chooseMaterial < 0.95 {
+					//metal
+					color := randVec3().MulWithVec3(randVec3())
+					fuzz := randFloatWBoundExpensive(0, 0.5)
+					material = Metal{color, fuzz}
+					world.Add(Sphere{center, 0.2, material})
+				} else {
+					//glass
+					material = Dielectric{1.5}
+					world.Add(Sphere{center, 0.2, material})
+				}
+			}
+		}
+	}
+	material1 := Dielectric{1.5}
+	world.Add(Sphere{Vec3{0, 1, 0}, 1.0, material1})
+
+	material2 := Lambertian{Vec3{0.4, 0.2, 0.1}}
+	world.Add(Sphere{Vec3{-4, 1, 0}, 1.0, material2})
+
+	material3 := Metal{Vec3{0.7, 0.6, 0.5}, 0.0}
+	world.Add(Sphere{Vec3{4, 1, 0}, 1.0, material3})
+	return
 }
