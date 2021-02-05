@@ -32,7 +32,7 @@ func traceTheRays() image.Image {
 
 	world.Add(Sphere{Vec3{0, -100.5, -1}, 100, mGround})
 	world.Add(Sphere{Vec3{0, 0, -1}, 0.5, mCenter})
-	world.Add(Sphere{Vec3{-1, 0, -1}, 0.5, mLeft})
+	world.Add(Sphere{Vec3{-1, 0, -1}, -0.4, mLeft})
 	world.Add(Sphere{Vec3{1, 0, -1}, 0.5, mRight})
 
 	//Camera

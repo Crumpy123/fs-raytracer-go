@@ -17,6 +17,10 @@ func randFloatWBound(min, max float64, rng RNG) float64 {
 	return min + rng.Float64()*(max-min)
 }
 
+func randomFloat(rng RNG) float64 {
+	return rng.Float64()
+}
+
 //clamps value x to mi or max
 func clamp(x, min, max float64) float64 {
 	if x < min {

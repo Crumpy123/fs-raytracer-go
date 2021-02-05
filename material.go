@@ -51,7 +51,7 @@ func (d Dielectric) Reflect(lightRay *LightRay, rng RNG) {
 
 	cannotRefract := refractionRatio*sinTheta > 1.0
 	var direction Vec3
-	if cannotRefract {
+	if cannotRefract || d.reflectance(cosTheta, refractionRatio) > randomFloat(rng) {
 		direction = reflectVec(unitDirection, lightRay.hitRecord.normal)
 	} else {
 		direction = refractVec(unitDirection, lightRay.hitRecord.normal, refractionRatio)
@@ -59,4 +59,11 @@ func (d Dielectric) Reflect(lightRay *LightRay, rng RNG) {
 	//refracted := refractVec(lightRay.ray.Direction.UnitVector(), lightRay.hitRecord.normal, refractionRatio)
 
 	lightRay.ray = Ray{lightRay.hitRecord.point, direction}
+}
+
+//using schlicks approximation for reflectance
+func (d Dielectric) reflectance(cosine, refIdx float64) float64 {
+	r0 := (1 - refIdx) / (1 + refIdx)
+	r0 = r0 * r0
+	return r0 + (1-r0)*math.Pow(1-cosine, 5)
 }
